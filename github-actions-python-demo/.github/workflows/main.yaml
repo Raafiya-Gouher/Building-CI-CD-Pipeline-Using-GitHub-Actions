@@ -3,7 +3,7 @@ name: CI/CD Pipeline - Flask App
 on:
   push:
     branches:
-      - main   # Runs whenever you push to main branch
+      - main          # Runs whenever you push to main branch
 
 jobs:
   build-test-deploy:
