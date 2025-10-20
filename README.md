@@ -65,14 +65,14 @@ Key steps:
 
 ## Folder Structure
 
-.
-├── app.py # Main Python application <br>
-├── requirements.txt # Python dependencies <br>
-├── tests/ # Unit tests <br>
-│ └── test_app.py <br>
-├── .github/ <br>
-│ └── workflows/ <br>
-│ └── main.yml # GitHub Actions workflow <br>
+.<br>
+├── app.py # Main Python application<br>
+├── requirements.txt # Python dependencies<br>
+├── tests/ # Unit tests<br>
+│ └── test_app.py<br>
+├── .github/<br>
+│ └── workflows/<br>
+│ └── main.yml # GitHub Actions workflow<br>
 ├── README.md
 
 ---
@@ -176,15 +176,8 @@ By implementing this project, the following concepts were learned:
    - Managing security group rules for network access.
    - Capturing logs from background processes.
 
----
 
-## Future Enhancements
 
-- Add **systemd service** for automatic app restarts on EC2 reboot.
-- Implement **staging environment** for testing before production.
-- Use **Docker** for containerized deployments.
-- Integrate **monitoring and alerts** for app uptime.
-- Add **automated rollback** if deployment fails.
 
 
 
