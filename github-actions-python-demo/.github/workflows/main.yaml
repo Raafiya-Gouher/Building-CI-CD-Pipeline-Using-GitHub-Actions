@@ -2,9 +2,9 @@ name: CI/CD Pipeline - Flask App
 
 # Trigger workflow on push to main branch
 on:
-  push:
+  [push]:
     branches:
-      - main  # Change to 'master' if your branch is master
+      - main  
 
 jobs:
   build-test-deploy:
