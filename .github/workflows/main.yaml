@@ -30,7 +30,7 @@ jobs:
       # Step 4: Run unit tests
       - name: Run unit tests
         run: |
-          pytest tests/  # Use pytest instead of unittest for better CI compatibility
+          PYTHONPATH=$(pwd) pytest tests/  # Use pytest instead of unittest for better CI compatibility
 
       # Step 5: Await manual approval before deployment
       - name: Await manual approval
