@@ -69,10 +69,10 @@ Key steps:
 ├── app.py # Main Python application<br>
 ├── requirements.txt # Python dependencies<br>
 ├── tests/ # Unit tests<br>
-│ └── test_app.py<br>
+   └── test_app.py<br>
 ├── .github/<br>
-│ └── workflows/<br>
-│ └── main.yml # GitHub Actions workflow<br>
+    └── workflows/<br>
+          └── main.yml # GitHub Actions workflow<br>
 ├── README.md
 
 ---
@@ -175,6 +175,7 @@ By implementing this project, the following concepts were learned:
    - Ensuring app listens on `0.0.0.0` for public access.
    - Managing security group rules for network access.
    - Capturing logs from background processes.
+
 
 
 
