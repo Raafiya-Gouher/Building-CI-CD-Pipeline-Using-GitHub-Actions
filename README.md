@@ -65,14 +65,14 @@ Key steps:
 
 ## Folder Structure
 .
-├── app.py # Main Python application
-├── requirements.txt # Python dependencies
-├── tests/ # Unit tests
-│ └── test_app.py
-├── .github/
-│ └── workflows/
-│ └── main.yml # GitHub Actions workflow
-└── README.md # Project documentation
+├── app.py<br>
+├── requirements.txt<br>
+├── tests/<br>
+│ └── test_app.py<br>
+├── .github/<br>
+│ └── workflows/<br>
+│ └── main.yml<br>
+└── README.md<br>
 
 ---
 
@@ -174,6 +174,7 @@ By implementing this project, the following concepts were learned:
    - Ensuring app listens on `0.0.0.0` for public access.
    - Managing security group rules for network access.
    - Capturing logs from background processes.
+
 
 
 
