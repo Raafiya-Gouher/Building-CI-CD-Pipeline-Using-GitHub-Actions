@@ -64,7 +64,7 @@ Key steps:
 ---
 
 ## Folder Structure
-.
+.<br>
 ├── app.py<br>
 ├── requirements.txt<br>
 ├── tests/<br>
@@ -174,6 +174,7 @@ By implementing this project, the following concepts were learned:
    - Ensuring app listens on `0.0.0.0` for public access.
    - Managing security group rules for network access.
    - Capturing logs from background processes.
+
 
 
 
