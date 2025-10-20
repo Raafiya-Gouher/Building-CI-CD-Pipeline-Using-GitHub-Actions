@@ -45,22 +45,27 @@ jobs:
           issue-title: "Deploy approval needed"
           issue-body: "Please approve deployment to production."
 
-      # Step 6: Deploy application (only if tests pass and approval is given)
+      # Step 6: Deploy entire repo to EC2
       - name: Deploy to EC2
         if: ${{ success() }}
         env:
           EC2_IP: ${{ secrets.EC2_HOST }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          echo "Deploying to EC2..."
+          echo "Deploying full repository to EC2..."
           echo "$EC2_SSH_KEY" > ec2-key.pem
           chmod 600 ec2-key.pem
 
-          # Copy application files
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem app.py ubuntu@$EC2_IP:/home/ubuntu/
+          # Create remote app directory if it doesn't exist
+          ssh -o StrictHostKeyChecking=no -i ec2-key.pem ubuntu@$EC2_IP "mkdir -p /home/ubuntu/app"
 
-          # Restart the app on EC2
+          # Copy the full repository to EC2
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ec2-key.pem" ./ ubuntu@$EC2_IP:/home/ubuntu/app/
+
+          # Restart the Python app on EC2
           ssh -o StrictHostKeyChecking=no -i ec2-key.pem ubuntu@$EC2_IP << 'EOF'
+            cd /home/ubuntu/app
+            pip3 install --upgrade -r requirements.txt
             pkill -f app.py || true
-            nohup python3 /home/ubuntu/app.py > /home/ubuntu/app.log 2>&1 &
+            nohup python3 app.py > app.log 2>&1 &
           EOF
