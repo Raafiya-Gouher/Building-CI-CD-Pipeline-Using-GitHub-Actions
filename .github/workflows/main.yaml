@@ -48,14 +48,20 @@ jobs:
       # Step 6: Deploy application (only runs if tests pass and approval given)
 
       
-      - name: Deploy to EC2 instance
+      - name: Deploy to EC2
         if: ${{ success() }}
+        env:
+            EC2_IP: ${{ secrets.EC2_IP }}
+            EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
               echo "Deploying to EC2..."
-              scp -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} app.py ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
-              ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ubuntu@${{ secrets.EC2_IP }} "
+              echo "$EC2_SSH_KEY" > ec2-key.pem
+              chmod 600 ec2-key.pem
+              scp -o StrictHostKeyChecking=no -i ec2-key.pem app.py ubuntu@${EC2_IP}:/home/ubuntu/
+              ssh -o StrictHostKeyChecking=no -i ec2-key.pem ubuntu@${EC2_IP} "
               pkill -f app.py || true
               nohup python3 /home/ubuntu/app.py > app.log 2>&1 &
-               "
+              "
+
 
 
