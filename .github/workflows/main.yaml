@@ -10,36 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest
 
+      # Step 4: Run unit tests
       - name: Run unit tests
         run: |
-          source venv/bin/activate
-          python -m unittest discover -s tests
+          pytest tests/  # Use pytest instead of unittest for better CI compatibility
 
+      # Step 5: Await manual approval before deployment
       - name: Await manual approval
         uses: trstringer/manual-approval@v1
         with:
-          approvers: raafiya-gouher   # 👈 Replace with your GitHub username
+          approvers: ${{ secrets.DEPLOY_APPROVER }}
           secret: ${{ github.TOKEN }}
           issue-title: "Deploy approval needed"
           issue-body: "Please approve deployment to production."
 
+      # Step 6: Deploy application (only runs if tests pass and approval given)
       - name: Deploy application
         if: ${{ success() }}
         run: |
           echo "Deploying application..."
-          # Example: SSH into EC2 and deploy
+          # Example deployment command:
           # ssh -o StrictHostKeyChecking=no ubuntu@<EC2_IP> 'bash deploy.sh'
