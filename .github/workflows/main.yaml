@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+      
+permissions:
+  contents: read
+  issues: write  
 
 jobs:
   build-test-deploy:
@@ -42,7 +46,7 @@ jobs:
           issue-body: "Please approve deployment to production."
 
       # Step 6: Deploy application (only runs if tests pass and approval given)
-      
+
       - name: Deploy application
         if: ${{ success() }}
         run: |
