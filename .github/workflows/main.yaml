@@ -1,51 +1,114 @@
 name: CI/CD Pipeline - Flask App
 
-# Trigger workflow on push to main branch
-on: [push]
+# -----------------------------------------------------------
+# Workflow Trigger: Runs on every push to the main branch.
+# You can also manually trigger this using 'workflow_dispatch'.
+# -----------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
+    # -------------------------------------------------------
+    # Use an environment called "production"
+    # This allows adding manual approval before deployment
+    # -------------------------------------------------------
+    environment: production
 
     steps:
-    # Step 1: Checkout repository
+    # -------------------------------------------------------
+    # Step 1: Checkout the repository code
+    # -------------------------------------------------------
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    # Step 2: Set up Python
+    # -------------------------------------------------------
+    # Step 2: Set up the desired Python version
+    # -------------------------------------------------------
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    # Step 3: Install dependencies in a virtual environment
-    - name: Install dependencies
+    # -------------------------------------------------------
+    # Step 3: Cache pip dependencies for faster installs
+    # -------------------------------------------------------
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # -------------------------------------------------------
+    # Step 4: Create and activate virtual environment + install dependencies
+    # -------------------------------------------------------
+    - name: Install dependencies in virtual environment
       run: |
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    # Step 4: Run unit tests
-    - name: Run tests
+    # -------------------------------------------------------
+    # Step 5: Run tests with pytest
+    # -------------------------------------------------------
+    - name: Run unit tests
       run: |
         source venv/bin/activate
-        pytest test_app.py
+        pytest test_app.py --maxfail=1 --disable-warnings -q
 
-    # Step 5: Deploy to EC2 via SSH
+    # -------------------------------------------------------
+    # Step 6: Wait for approval before deployment
+    # This step pauses the workflow until an approver approves it
+    # -------------------------------------------------------
+    - name: Await manual approval
+      uses: trstringer/manual-approval@v1
+      with:
+        approvers: ${{ secrets.APPROVERS }}
+        minimum-approvals: 1
+        timeout-minutes: 60
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # -------------------------------------------------------
+    # Step 7: Deploy application to EC2 via SSH
+    # -------------------------------------------------------
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        script_stop: true
         script: |
-          cd ~/github-actions-python-demo
+          set -e  # Exit immediately if any command fails
+
+          # Navigate to your app directory on EC2
+          cd ~/Building-CI-CD-Pipeline-Using-GitHub-Actions
+
+          # Pull latest code
           git pull origin main
-          # Create or activate virtual environment
-          source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
+
+          # Create or activate virtual environment on EC2
+          if [ ! -d "venv" ]; then
+            echo "Creating new virtual environment..."
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+
+          # Upgrade pip and install dependencies
           pip install --upgrade pip
           pip install -r requirements.txt
-          # Stop running app if any and restart
+
+          # Stop the app if running (ignore errors if not)
           pkill -f app.py || true
+
+          # Start app in background with nohup
           nohup python3 app.py > app.log 2>&1 &
+          echo "✅ Deployment completed successfully!"
